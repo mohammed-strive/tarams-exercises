@@ -65,10 +65,15 @@ def overlap(rectA, rectB):
 if __name__ == "__main__":
     r1 = Rectangle(0, 0, 10, 10)
     r2 = Rectangle(7, 7, 10, 10)
-    print(overlap(r1, r2))
     r3 = Rectangle(20, 20, 10, 10)
-    print(overlap(r1, r3))
     r4 = Rectangle(4, 4, 1, 1)
-    print(overlap(r4, r1))
     r5 = Rectangle(8, 8, 13, 12)
-    print(overlap(r5, r1))
+
+    rectangles = [r1, r2, r3, r4, r5]
+
+    for index, rect1 in enumerate(rectangles):
+        for rect2 in rectangles[index+1:]:
+            rect = overlap(rect1, rect2)
+            if rect:
+                print("Overlap of {} and {} is {}".format(rect1, rect2,
+                    rect))
