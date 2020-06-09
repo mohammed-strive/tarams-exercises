@@ -1,13 +1,14 @@
-import re
+import regex as re
 import sys
-import pprint
+
+tableRow = False
 
 def parse_table(filename):
+    global tableRow
     data = []
     with open(filename, 'r') as fh:
         for line in fh:
             line = line.strip()
-            tableRow = False
             if is_table_row(line):
                 data.append(extract_data(line))
                 tableRow = True
@@ -17,15 +18,14 @@ def parse_table(filename):
     return data
 
 def is_table_row(line):
-    columns = re.split(r'[ ]{2,}', line)
+    columns = re.split(r'[ ]{3,}', line)
     if len(columns) > 4 and len(columns) <= 7:
         return True
     else:
         return False
 
 def extract_data(line):
-    columns = re.split(r'[ ]{4,}', line)
-    print(columns)
+    columns = re.split(r'[ ]{3,}', line)
     data = []
     for column in columns:
         key, match = parse_line(column, patterns)
@@ -35,16 +35,14 @@ def extract_data(line):
     return data
 
 def add_to_row(row, line):
-    for item in row:
-        if item.get("descriptions"):
-            item["descriptions"] += " " + line
+    row[2] += " " + line
 
 patterns = {
     "trndate": re.compile(r'\d{2}[-\\/:][A-Z]{3}[-\\/:]\d{2}'),
     "brn": re.compile(r'[0-9]{1,4}'),
-    "descriptions": re.compile(r'[a-zA-Z]+'),
+    "descriptions": re.compile(r'[a-zA-Z0-9-,\\/ ]+'),
     "references": re.compile(r'\d{1,8}'),
-    "amount": re.compile(r'\d+\.\d+?'),
+    "amount": re.compile(r'[0-9, ]+(?: )?\.\d{2}'),
 }
 
 def parse_line(line, patterns):
@@ -57,3 +55,4 @@ def parse_line(line, patterns):
 if __name__ == '__main__':
     filename = sys.argv[1]
     data = parse_table(filename)
+    [print(line) for line in data]
