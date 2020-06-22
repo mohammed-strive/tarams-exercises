@@ -52,6 +52,32 @@ def parse_line(line, patterns):
             return key, match
     return None, None
 
+def get_data(line):
+     line = line.strip()
+     data = bytearray('', encoding='utf8')
+     count = 0
+     delimiter = ' '
+     for char in line:
+         if char == delimiter:
+             count += 1
+         elif char != delimiter:
+             if 0 < count < 2:
+                 for i in range(count):
+                     data.append(ord(delimiter))
+                 count = 0
+             elif count == 0:
+                 data.append(ord(char))
+             elif 2 <= count < 10
+                 data.append(ord('#'))
+                 data.append(ord(char))
+                 count = 0
+             elif count >= 10:
+                 data.append(ord('#'))
+                 data.append(ord('#'))
+                 data.append(ord(char))
+                 count = 0
+     return data
+
 if __name__ == '__main__':
     filename = sys.argv[1]
     data = parse_table(filename)
