@@ -14,6 +14,21 @@ try:
 except IndexError:
     print("Provide an image")
     exit(1)
+    
+def sort_contours(contours, method="left-right"):
+    reverse = False
+    i = 0
+
+    if method == "right-left" or method == "bottom-top":
+        reverse = True
+
+    if method == "top-bottom" or method == "bottom -top":
+        i = 1   
+
+    boundingBoxes = [cv2.BoundingRect(c) for c in contours]
+    (contours, boundingBoxes) = zip(*(sorted(zip(contours, boundingBoxes),
+        key=lambda b: b[1][i], reverse=reverse)))
+    return (contours, boundingBoxes)
 
 img = cv2.imread(file, 0)
 threshold, img_bin = cv2.threshold(img, 128, 255,
@@ -54,17 +69,21 @@ bitnot = cv2.bitwise_not(bitxor)
 contours, hierarchy = cv2.findContours(img_vh, cv2.RETR_TREE,
     cv2.CHAIN_APPROX_SIMPLE)
 
-def sort_contours(contours, method="left-right"):
-    reverse = False
-    i = 0
+contours, boundingBoxes = sort_contours(contours, method='top-bottom')
 
-    if method == "right-left" or method == "bottom-top":
-        reverse = True
+# Creating a list of heights for all detected boxes..
+heights = [boundingBoxes[i][3] for i in range(len(boundingBoxes))]
+mean = np.mean(heights)
 
-    if method == "top-bottom" or method == "bottom -top":
-        i = 1
+box = []
 
-    boundingBoxes = [cv2.BoundingRect(c) for c in contours]
-    (contours, boundingBoxes) = zip(*(sorted(zip(contours, boundingBoxes),
-        key=lambda b: b[1][i], reverse=reverse)))
-    return (contours, boundingBoxes)
+# Get position(x, y) and width and height for every contour and show the
+# contour on image..
+for c in contours:
+    x, y, w, h = cv2.boundingRect(c)
+
+    if (w < 1000 and h < 500):
+        image = cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        box.append([x, y, w, h])
+
+cv2.imwrite(os.path.join(dirname, "{}_rectangles.jpeg".format(basename,)), img)
